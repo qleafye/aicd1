@@ -305,9 +305,10 @@ file_paths = [
 
 
 
-print("--- Запуск PackBits RLE ---")
-for i, file_path in enumerate(file_paths):
-    output_compressed = f"compressed files/RLE/{file_path[:-4]}.bin"
-    output_decompressed = f"decompressed files/RLE/{file_path[:-4]}.bin"
-    print(f"Обработка файла {file_path}...")
-    process_file_nontext_1(file_path, output_compressed, output_decompressed)
+if __name__ == "__main__":
+    print("--- Запуск PackBits RLE ---")
+    for i, file_path in enumerate(file_paths):
+        output_compressed = f"compressed files/RLE/{file_path[:-4]}.bin"
+        output_decompressed = f"decompressed files/RLE/{file_path[:-4]}.bin"
+        print(f"Обработка файла {file_path}...")
+        process_file_nontext_1(file_path, output_compressed, output_decompressed)

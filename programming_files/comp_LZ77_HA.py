@@ -307,10 +307,11 @@ file_paths = [
         "enwik7"
 ]
 
-print("--- Запуск LZ77+HA ---")
+if __name__ == "__main__":
+    print("--- Запуск LZ77+HA ---")
 # Обработка каждого файла
-for file_path in file_paths:
-    output_compressed = f"{compressed_dir}/{file_path[:-4]}.bin"
-    output_decompressed = f"{decompressed_dir}/{file_path[:-4]}.bin"
-    print(f"Обработка файла {file_path}...")
-    process_file_with_lz77_huffman(file_path, output_compressed, output_decompressed)
+    for file_path in file_paths:
+        output_compressed = f"{compressed_dir}/{file_path[:-4]}.bin"
+        output_decompressed = f"{decompressed_dir}/{file_path[:-4]}.bin"
+        print(f"Обработка файла {file_path}...")
+        process_file_with_lz77_huffman(file_path, output_compressed, output_decompressed)

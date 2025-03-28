@@ -377,12 +377,11 @@ file_paths = [
     "enwik7",
     "binary_file.bin"
 ]
-print("--- Запуск BWT+RLE+MTF+HA ---")
-# Обработка каждого файла
-for file_path in file_paths:
-    output_compressed = f"compressed files/BWT+RLE+MTF+HA/{file_path[:-4]}.bin"
-    output_decompressed = f"decompressed files/BWT+RLE+MTF+HA/{file_path[:-4]}.bin"
-
-    # Сжатие
-    process_with_bwt_rle_mtf_ha(file_path, output_compressed, output_decompressed)
+if __name__ == "__main__":
+    print("--- Запуск BWT+RLE+MTF+HA ---")
+        # Обработка каждого файла
+    for file_path in file_paths:
+        output_compressed = f"compressed files/BWT+RLE+MTF+HA/{file_path[:-4]}.bin"
+        output_decompressed = f"decompressed files/BWT+RLE+MTF+HA/{file_path[:-4]}.bin"
+        process_with_bwt_rle_mtf_ha(file_path, output_compressed, output_decompressed)
 

@@ -37,6 +37,7 @@ file_paths = [
 
 # Список алгоритмов и их директорий
 algorithms = [
+        
     {
         'name': 'LZ77+HA',
         'function': process_file_with_lz77_huffman,
@@ -57,6 +58,7 @@ algorithms = [
         'function': process_file_with_lz78,
         'dir': 'LZ78'   
     },
+    
     {
         'name': 'LZ77',
         'function': process_file_with_lz77_optimized,

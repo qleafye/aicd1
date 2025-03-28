@@ -254,14 +254,14 @@ def process_file_with_lz77_optimized(input_path, compressed_path, decompressed_p
     compressed_size = os.path.getsize(compressed_path)
     compression_ratio = original_size / compressed_size if compressed_size > 0 else 0
     elapsed_time = end_time - start_time
-    print(f"Исходный файл:      {file_path}")
-    print(f"Алгоритм:           BWT + RLE")
+    print(f"Исходный файл:      {input_path}")
+    print(f"Алгоритм:           LZ77")
     print(f"Размер исходный:    {format_size(original_size)}")
     print(f"Размер сжатый:      {format_size(compressed_size)}")
     print(f"Степень сжатия:     {compression_ratio:.3f}")
     print(f"Экономия места:     {(1 - compressed_size / original_size) * 100:.2f}%")
     print(f"Время сжатия:       {elapsed_time:.3f} сек")
-    print(f"Исходный и декомпрессированный файл совпадают: {'да' if check_files_match(file_path, output_decompressed) else 'нет'}")
+    print(f"Исходный и декомпрессированный файл совпадают: {'да' if check_files_match(input_path, decompressed_path) else 'нет'}")
     print("-" * 50)
 
 def format_size(size_in_bytes):

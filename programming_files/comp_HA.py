@@ -101,21 +101,6 @@ def write_huffman_codes(huffman_codes, file_path):
         for symbol, code in huffman_codes.items():
             code_file.write(f"{symbol}:{code}\n")
 
-def calculate_entropy(data: bytes) -> float:
-    """
-    Вычисляет энтропию данных по формуле Шеннона.
-    """
-    counter = count_symb(data)
-    total_symbols = len(data)
-    entropy = 0.0
-
-    for count in counter:
-        if count > 0:
-            probability = count / total_symbols
-            entropy -= probability * math.log2(probability)
-
-    return entropy
-
 def calculate_average_code_length(huffman_codes: dict, data: bytes) -> float:
     """
     Вычисляет среднюю длину кода Хаффмана.
@@ -208,10 +193,11 @@ file_paths = [
     "enwik7",
     "binary_file.bin"
 ]
-print("--- Запуск HA ---")
+if __name__ == "__main__":
+    print("--- Запуск HA ---")
 # Обработка каждого файла
-for i, file_path in enumerate(file_paths):
-    output_compressed = f"compressed files/HA/{file_path[:-4]}.bin"
-    output_decompressed = f"decompressed files/HA/{file_path[:-4]}.bin"
-    print(f"Обработка файла {file_path}...")
-    process_file_nontext_1(file_path, output_compressed, output_decompressed)
+    for i, file_path in enumerate(file_paths):
+        output_compressed = f"compressed files/HA/{file_path[:-4]}.bin"
+        output_decompressed = f"decompressed files/HA/{file_path[:-4]}.bin"
+        print(f"Обработка файла {file_path}...")
+        process_file_nontext_1(file_path, output_compressed, output_decompressed)
