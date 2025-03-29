@@ -3,22 +3,23 @@ import heapq
 import time
 import math
 import os
+import queue
 from collections import defaultdict
 
 # Размер блока (200 КБ)
 BLOCK_SIZE = 200 * 1024
 
 
-# Класс для узлов дерева Хаффмана
-class HuffmanNode:
-    def __init__(self, char=None, freq=0, left=None, right=None):
-        self.char = char
-        self.freq = freq
+class Node():
+    def __init__(self, symbol=None, counter=None, left=None, right=None, parent=None):
+        self.symbol = symbol
+        self.counter = counter
         self.left = left
         self.right = right
+        self.parent = parent
 
     def __lt__(self, other):
-        return self.freq < other.freq
+        return self.counter < other.counter
 
 
 # Функции для BWT
@@ -140,80 +141,106 @@ def rle_decompress(compressed_data: bytes) -> bytes:
     return bytes(decompressed)
 
 
-# Функции для Хаффмана
-def build_huffman_tree(freq_dict):
-    heap = []
-    for char, freq in freq_dict.items():
-        heapq.heappush(heap, HuffmanNode(char=char, freq=freq))
-
-    while len(heap) > 1:
-        left = heapq.heappop(heap)
-        right = heapq.heappop(heap)
-        merged = HuffmanNode(freq=left.freq + right.freq, left=left, right=right)
-        heapq.heappush(heap, merged)
-
-    return heapq.heappop(heap)
-
-
-def build_huffman_codes(node, current_code="", codes=None):
-    if codes is None:
-        codes = {}
-    if node.char is not None:
-        codes[node.char] = current_code
-    else:
-        build_huffman_codes(node.left, current_code + "0", codes)
-        build_huffman_codes(node.right, current_code + "1", codes)
-    return codes
-
-def huffman_compress(data: bytes) -> tuple[bytes, dict]:
-    freq_dict = defaultdict(int)
+def count_symb(data: bytes) -> np.ndarray:
+    counter = np.zeros(256, dtype=int)
     for byte in data:
-        freq_dict[byte] += 1
+        counter[byte] += 1
+    return counter
 
-    if len(freq_dict) == 0:
-        return bytes(), {}
+def huffman_compress(data: bytes) -> bytes:
+    C = count_symb(data)
+    list_of_leafs = []
+    Q = queue.PriorityQueue()
 
-    root = build_huffman_tree(freq_dict)
-    codes = build_huffman_codes(root)
+    for i in range(256):
+        if C[i] != 0:
+            leaf = Node(symbol=i, counter=C[i])
+            list_of_leafs.append(leaf)
+            Q.put(leaf)
 
-    encoded_bits = []
+    while Q.qsize() >= 2:
+        left_node = Q.get()
+        right_node = Q.get()
+        parent_node = Node(left=left_node, right=right_node)
+        left_node.parent = parent_node
+        right_node.parent = parent_node
+        parent_node.counter = left_node.counter + right_node.counter
+        Q.put(parent_node)
+
+    codes = {}
+    for leaf in list_of_leafs:
+        node = leaf
+        code = ""
+        while node.parent is not None:
+            if node.parent.left == node:
+                code = "0" + code
+            else:
+                code = "1" + code
+            node = node.parent
+        codes[leaf.symbol] = code
+
+    coded_message = ""
     for byte in data:
-        encoded_bits.append(codes[byte])
+        coded_message += codes[byte]
 
-    bit_string = ''.join(encoded_bits)
-    padding = 8 - len(bit_string) % 8
-    bit_string += '0' * padding
+    padding = 8 - len(coded_message) % 8
+    coded_message += '0' * padding
+    coded_message = f"{padding:08b}" + coded_message
 
-    compressed = bytearray()
-    compressed.append(padding)
+    bytes_string = bytearray()
+    for i in range(0, len(coded_message), 8):
+        byte = coded_message[i:i + 8]
+        bytes_string.append(int(byte, 2))
 
-    for i in range(0, len(bit_string), 8):
-        byte = bit_string[i:i + 8]
-        compressed.append(int(byte, 2))
-
-    return bytes(compressed), codes
-
+    return bytes(bytes_string), codes
 
 def huffman_decompress(compressed_data: bytes, huffman_codes: dict) -> bytes:
-    if len(compressed_data) == 0:
-        return bytes()
-
     padding = compressed_data[0]
-    bit_string = ''.join(f"{byte:08b}" for byte in compressed_data[1:])
+    coded_message = ""
+    for byte in compressed_data[1:]:
+        coded_message += f"{byte:08b}"
+
     if padding > 0:
-        bit_string = bit_string[:-padding]
+        coded_message = coded_message[:-padding]
 
     reverse_codes = {v: k for k, v in huffman_codes.items()}
     current_code = ""
-    decompressed = bytearray()
+    decoded_data = bytearray()
 
-    for bit in bit_string:
+    for bit in coded_message:
         current_code += bit
         if current_code in reverse_codes:
-            decompressed.append(reverse_codes[current_code])
+            decoded_data.append(reverse_codes[current_code])
             current_code = ""
 
-    return bytes(decompressed)
+    return bytes(decoded_data)
+
+def read_huffman_codes(codes_file):
+    huffman_codes = {}
+    with open(codes_file, 'r') as f:
+        for line in f:
+            symbol, code = line.strip().split(':')
+            huffman_codes[int(symbol)] = code
+    return huffman_codes
+
+def write_huffman_codes(huffman_codes, file_path):
+    with open(file_path, 'w') as code_file:
+        for symbol, code in huffman_codes.items():
+            code_file.write(f"{symbol}:{code}\n")
+
+def calculate_average_code_length(huffman_codes: dict, data: bytes) -> float:
+    """
+    Вычисляет среднюю длину кода Хаффмана.
+    """
+    counter = count_symb(data)
+    total_symbols = len(data)
+    total_length = 0.0
+
+    for symbol, code in huffman_codes.items():
+        probability = counter[symbol] / total_symbols
+        total_length += probability * len(code)
+
+    return total_length
 
 
 def process_block(block: bytes) -> tuple[bytes, list[int], dict, float, float]:
